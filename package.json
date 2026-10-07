@@ -1,0 +1,80 @@
+{
+  "name": "dsh-speech-service",
+  "version": "0.1.0",
+  "description": "Removable speech enhancements for the upstream DSH voice input",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "lib",
+    "src",
+    "scripts",
+    "locale",
+    "cordis.patch.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "licenses"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vb2250158/dsh-speech-service.git"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.5-alpha.1 <5.0.0",
+    "@deepseek-ai/dsh-api-remotes": ">=0.2.1-alpha.1 <0.3.0",
+    "@deepseek-ai/dsh-api-session-controller": ">=0.2.1-alpha.1 <0.3.0",
+    "@deepseek-ai/dsh-client-locale": ">=0.2.1-alpha.1 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-conversation": ">=0.2.1-alpha.1 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-plugin-manager": ">=0.2.1-alpha.1 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-primitives": ">=0.2.1-alpha.1 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-renderer": ">=0.2.1-alpha.1 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-session": ">=0.2.1-alpha.1 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-settings": ">=0.2.1-alpha.1 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-slots": ">=0.2.1-alpha.1 <0.3.0",
+    "@deepseek-ai/dsh-experimental-client-ui-voice-input": ">=0.2.1-alpha.1 <0.3.0",
+    "@deepseek-ai/dsh-settings": ">=0.2.1-alpha.1 <0.3.0",
+    "@deepseek-ai/schemastery": ">=3.18.5-alpha.1 <4.0.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/schemastery": "^3.18.5-alpha.1",
+    "esbuild": "^0.27.0"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:client": "node scripts/test-client.mjs",
+    "test:browser": "node scripts/test-browser.mjs",
+    "typecheck": "node scripts/typecheck.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/cordis",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-primitives",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-session",
+        "@deepseek-ai/dsh-client-ui-plugin-manager",
+        "@deepseek-ai/dsh-api-remotes",
+        "@deepseek-ai/dsh-api-session-controller",
+        "@deepseek-ai/dsh-experimental-client-ui-voice-input"
+      ]
+    }
+  }
+}

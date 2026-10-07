@@ -1,0 +1,98 @@
+/** Built microphone UI over the shipped voice bundle, with deterministic external audio and recognition. */
+import { fileURLToPath } from 'node:url'
+import { chromium, type Browser } from 'playwright'
+import type {} from '@deepseek-ai/dsh-experimental-speech-to-text'
+import type { SpeechProviderId } from '@deepseek-ai/dsh-experimental-speech-to-text/types'
+import { expect, it } from 'vitest'
+import { compareOrRefreshGolden, launchWebScaffold } from './scaffold.ts'
+import { connectFreshWorkspaceZh, ZH_BROWSER_LOCALE } from './support.ts'
+
+it('records in the ordinary composer, displays measured waveform, ends on silence and restores saved preferences', async () => {
+  const scaffold = await launchWebScaffold({
+    extraOverlayPath: [fileURLToPath(new URL('./pin-browse-picker.overlay.yml', import.meta.url)),
+      process.env.DSH_SPEECH_PLUGIN_ROOT! + '/tests/input.overlay.yml'],
+    profile: { packages: [{ dir: process.env.DSH_SPEECH_PLUGIN_ROOT!, enabled: true }], bundles: ['@deepseek-ai/dsh-experimental-voice-input-bundle'] },
+  })
+  let browser: Browser | undefined
+  let transcriptions = 0
+  const speech = scaffold.ctx.get('speechToText')!
+  scaffold.ctx.effect(() => speech.register({
+    info: { id: 'sensevoice-local' as SpeechProviderId, name: 'Browser test recognizer', location: 'host-local', languages: ['auto'] },
+    transcribe: async ({ audio }) => {
+      expect(audio.length).toBeGreaterThan(16000)
+      transcriptions++
+      return { text: '语音输入测试', audioSeconds: 1.5, inferenceSeconds: 0 }
+    },
+  }))
+  try {
+    await scaffold.ctx.settings.update('dsh-speech-service', { autoSend: false })
+    browser = await chromium.launch()
+    const page = await browser.newPage({ viewport: { width: 1360, height: 900 }, locale: ZH_BROWSER_LOCALE })
+    const errors: string[] = []
+    page.on('pageerror', error => errors.push(error.message))
+    page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
+    await page.addInitScript(() => {
+      navigator.mediaDevices.getUserMedia = async () => {
+        const context = new AudioContext(), destination = context.createMediaStreamDestination()
+        const oscillator = context.createOscillator(), gain = context.createGain()
+        gain.gain.value = 0.15
+        oscillator.connect(gain).connect(destination)
+        await context.resume()
+        oscillator.start()
+        gain.gain.setValueAtTime(0, context.currentTime + 0.6)
+        destination.stream.getTracks().forEach((track) => {
+          track.addEventListener('ended', () => { void context.close() }, { once: true })
+        })
+        return destination.stream
+      }
+    })
+    await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
+    await connectFreshWorkspaceZh(page, scaffold.workspaceCwd)
+    const input = page.locator('[data-composer-input]').first()
+    await expect.poll(() => page.locator('[data-speech-enhancement-input]').count()).toBe(1)
+    await page.getByRole('button', { name: '开始录音', exact: true }).click()
+    const waveform = page.getByRole('img', { name: '正在录音…', exact: true })
+    await waveform.waitFor()
+    await expect.poll(async () => waveform.locator('line').last().getAttribute('y2')).not.toBe('21')
+    await expect.poll(() => input.innerText(), { timeout: 10000 }).toBe('语音输入测试')
+    expect(transcriptions).toBe(1)
+    expect(await page.getByRole('button', { name: '开始录音', exact: true }).count()).toBe(1)
+    expect(await page.locator('[data-speech-enhancement-input]').count()).toBe(1)
+    await page.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
+    const panel = page.locator('[data-plugin-panel]')
+    await panel.getByRole('button', { name: '查看 语音服务', exact: true }).click()
+    await page.getByLabel('转写后自动发送', { exact: true }).click()
+    await expect.poll(() => page.getByLabel('转写后自动发送', { exact: true }).isEnabled()).toBe(true)
+    await expect.poll(() => page.getByLabel('转写后自动发送', { exact: true }).isChecked()).toBe(true)
+    await page.getByLabel('自动朗读回复', { exact: true }).click()
+    await expect.poll(() => page.getByLabel('自动朗读回复', { exact: true }).isChecked()).toBe(true)
+    await page.getByLabel('静音收尾（毫秒）', { exact: true }).fill('1500')
+    await page.getByLabel('静音收尾（毫秒）', { exact: true }).press('Tab')
+    await expect.poll(() => page.getByLabel('静音收尾（毫秒）', { exact: true }).isEnabled()).toBe(true)
+    await compareOrRefreshGolden(process.env.DSH_SPEECH_PLUGIN_ROOT! + '/tests/settings.expected.md',
+      (await panel.ariaSnapshot()).replaceAll(process.env.DSH_SPEECH_PLUGIN_ROOT!.replace(/[\\/]$/, ''), '<plugin>'), scaffold.mode)
+    await page.reload()
+    await page.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
+    await panel.getByRole('button', { name: '查看 语音服务', exact: true }).click()
+    await expect.poll(() => page.getByLabel('转写后自动发送', { exact: true }).isChecked()).toBe(true)
+    await expect.poll(() => page.getByLabel('自动朗读回复', { exact: true }).isChecked()).toBe(true)
+    expect(await page.getByLabel('静音收尾（毫秒）', { exact: true }).inputValue()).toBe('1500')
+
+    await page.getByLabel('增强输入框语音', { exact: true }).uncheck()
+    await expect.poll(() => page.getByLabel('增强输入框语音', { exact: true }).isChecked()).toBe(false)
+    await expect.poll(() => page.getByLabel('增强输入框语音', { exact: true }).isEnabled()).toBe(true)
+    await page.reload()
+    await page.getByRole('button', { name: '开始录音', exact: true }).waitFor()
+    expect(await page.locator('[data-speech-enhancement-input]').count()).toBe(0)
+    await page.getByRole('navigation', { name: '全局面板' }).getByRole('button', { name: '插件', exact: true }).click()
+    await panel.getByRole('button', { name: '查看 语音服务', exact: true }).click()
+    expect(await page.getByLabel('自动朗读回复', { exact: true }).isChecked()).toBe(true)
+    await page.getByLabel('增强输入框语音', { exact: true }).check()
+    await expect.poll(() => page.getByLabel('增强输入框语音', { exact: true }).isChecked()).toBe(true)
+    await expect.poll(() => page.getByLabel('增强输入框语音', { exact: true }).isEnabled()).toBe(true)
+    expect(errors).toEqual([])
+  } finally {
+    await browser?.close()
+    await scaffold.close()
+  }
+})

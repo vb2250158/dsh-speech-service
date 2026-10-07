@@ -1,0 +1,37 @@
+- button "返回插件列表": 插件列表
+- button "卸载 语音服务": 卸载
+- switch "启用 语音服务" [checked]
+- heading "语音服务" [level=3]
+- text: v0.1.0
+- paragraph:
+  - code: dsh-speech-service
+- paragraph: 增强官方语音输入：静音收尾、自动发送和自动朗读，可逐项停用。
+- paragraph: 在官方语音输入上增加可独立停用的增强。关闭增强输入框语音后恢复官方输入方式。
+- checkbox "增强输入框语音" [checked]
+- text: 增强输入框语音
+- checkbox "静音后自动结束录音" [checked]
+- text: 静音后自动结束录音
+- checkbox "转写后自动发送" [checked]
+- text: 转写后自动发送
+- checkbox "自动朗读回复" [checked]
+- text: 自动朗读回复 声音阈值（RMS）
+- spinbutton "声音阈值（RMS）": "0.01"
+- text: 静音收尾（毫秒）
+- spinbutton "静音收尾（毫秒）": "1500"
+- paragraph: 通过已启用的朗读插件播放新回复正文，需要可用的语音合成服务。历史回复不会自动朗读。
+- button "识别模型与语言设置"
+- heading "包含的组件" [level=4]
+- text: 共 1 个 · 1 运行中
+- list:
+  - listitem:
+    - text: 语音服务 增强官方语音输入：静音收尾、自动发送和自动朗读，可逐项停用。
+    - code: dsh-speech-service
+    - code: dsh-speech-service
+    - text: 运行中
+    - switch "启用组件 语音服务" [checked]
+- heading "来源信息" [level=4]
+- term: 代码来源
+- definition:
+  - code: file:<plugin>
+- term: 当前版本
+- definition: 0.1.0

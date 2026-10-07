@@ -1,0 +1,3 @@
+- id: dsh-speech-service
+  config:
+    autoRead: true
