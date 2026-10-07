@@ -49,7 +49,7 @@ export function apply(ctx: Context): void {
   ctx.effect(() => () => { inputDispose?.(); inputDispose = undefined })
   syncInput()
   ctx.slots.inject('plugins.bundle.config', () => ctx.slots.register({ name: 'plugins.bundle.config', key: 'dsh-speech-service', locale: NS,
-    inject: () => ({ form, openRecognition }),
+    inject: () => ({ form, openRecognition, configure: actions.configure, hooks: { speechReadiness: readiness.state } }),
   }, Settings))
   const autoRead = { getSnapshot: () => form.getSnapshot().status === 'ready' && form.getSnapshot().value?.autoRead === true,
     subscribe: (listener: () => void) => form.subscribe(listener) }

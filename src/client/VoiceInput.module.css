@@ -29,6 +29,13 @@
 .preferences select, .sourceChoice select { border: 0.5px solid var(--dsw-alias-border-l1); border-radius: 6px; padding: 6px 10px; background: transparent; color: inherit; font: inherit; }
 .sourceChoice { display: grid; gap: 6px; }
 .preferences p { margin: 0; }
+.models, .modelEditor { display: grid; gap: 12px; min-width: 0; }
+.modelRow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border: 0.5px solid var(--dsw-alias-border-l1); border-radius: 10px; padding: 12px; }
+.modelRow code { flex-basis: 100%; overflow-wrap: anywhere; }
+.modelRow label { display: flex; gap: 8px; }
+.modelEditor { border: 0.5px solid var(--dsw-alias-border-l1); border-radius: 10px; padding: 12px; }
+.modelEditor label { grid-template-columns: minmax(100px, 160px) minmax(0, 1fr); }
+@media (max-width: 480px) { .modelEditor label { grid-template-columns: 1fr; gap: 6px; } }
 .preferences input[type='number'] { min-width: 0; border: 0.5px solid var(--dsw-alias-border-l1); border-radius: 6px; padding: 6px 10px; background: transparent; color: inherit; font: inherit; }
 .preferences input[type='checkbox'] { justify-self: start; accent-color: var(--dsw-alias-state-business-primary); }
 .settingsCard { list-style: none; padding: 16px; border: 0.5px solid var(--dsw-alias-border-l1); border-radius: 10px; }

@@ -2,7 +2,7 @@
 - button "卸载 语音服务": 卸载
 - switch "启用 语音服务" [checked]
 - heading "语音服务" [level=3]
-- text: v0.1.0
+- text: v0.2.0
 - paragraph:
   - code: dsh-speech-service
 - paragraph: 增强官方语音输入：静音收尾、自动发送和自动朗读，可逐项停用。
@@ -19,6 +19,14 @@
 - text: 静音收尾（毫秒）
 - spinbutton "静音收尾（毫秒）": "1500"
 - paragraph: 通过已启用的朗读插件播放新回复正文，需要可用的语音合成服务。历史回复不会自动朗读。
+- heading "自定义 ASR 模型" [level=4]
+- paragraph: 添加运行 DSH 的电脑上的本地模型。保存后可在下方「识别服务」中切换；Python 环境需已安装所选后端，不会自动下载模型。
+- paragraph: 未添加自定义模型，继续使用官方识别器。
+- button "添加 ASR 模型"
+- text: 识别服务
+- combobox "识别服务":
+  - option "请选择识别服务" [disabled]
+  - option "Browser test recognizer" [selected]
 - button "识别模型与语言设置"
 - heading "包含的组件" [level=4]
 - text: 共 1 个 · 1 运行中
@@ -34,4 +42,4 @@
 - definition:
   - code: file:<plugin>
 - term: 当前版本
-- definition: 0.1.0
+- definition: 0.2.0

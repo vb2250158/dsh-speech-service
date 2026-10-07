@@ -5,6 +5,15 @@ export const NS = 'speech-service-enhancement'
 
 /** Chinese dictionary and key source. */
 export const zh = {
+  modelsTitle: '自定义 ASR 模型',
+  chooseProvider: '请选择识别服务',
+  modelsHelp: '添加运行 DSH 的电脑上的本地模型。保存后可在下方「识别服务」中切换；Python 环境需已安装所选后端，不会自动下载模型。',
+  modelsEmpty: '未添加自定义模型，继续使用官方识别器。',
+  addModel: '添加 ASR 模型', editModel: '编辑模型', removeModel: '移除模型', saveModel: '保存模型',
+  modelName: '模型名称', modelEngine: 'ASR 后端', modelPath: '模型绝对路径',
+  pythonExecutable: 'Python 可执行文件', device: '计算设备', computeType: '计算精度',
+  modelLanguages: '支持的语言（逗号分隔）', modelEnabled: '启用模型',
+  computeHelp: '设备示例：cpu、cuda。计算精度只用于 faster-whisper（如 int8、float16）。每次识别按需加载模型，结束后释放；大模型加载可能较慢。',
   saveRefused: '设置未保存，请检查插件状态后重试。',
   enhancedInput: '增强输入框语音',
   silenceDetection: '静音后自动结束录音',
@@ -114,6 +123,15 @@ export type VoiceKey = keyof typeof zh
 
 /** English dictionary with the same complete key set. */
 export const en: Record<VoiceKey, string> = {
+  modelsTitle: 'Custom ASR models',
+  chooseProvider: 'Choose a recognition service',
+  modelsHelp: 'Add local checkpoints on the computer running DSH. Select a saved model below. Python must already have the selected backend installed. Models are never downloaded automatically.',
+  modelsEmpty: 'No custom models. The upstream recognizer remains available.',
+  addModel: 'Add ASR model', editModel: 'Edit model', removeModel: 'Remove model', saveModel: 'Save model',
+  modelName: 'Model name', modelEngine: 'ASR backend', modelPath: 'Absolute model path',
+  pythonExecutable: 'Python executable', device: 'Device', computeType: 'Compute precision',
+  modelLanguages: 'Supported languages (comma separated)', modelEnabled: 'Enable model',
+  computeHelp: 'Devices include cpu and cuda. Precision applies only to faster-whisper (for example int8 or float16). Each recognition loads and releases its model; larger checkpoints may load slowly.',
   saveRefused: 'Settings were not saved. Check the plugin state and retry.',
   enhancedInput: 'Enhanced voice input',
   silenceDetection: 'Finish recording after silence',

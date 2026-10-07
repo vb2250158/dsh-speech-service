@@ -1,0 +1,30 @@
+import { expect, test } from 'vitest'
+import { readFile } from 'node:fs/promises'
+import type { SpeechProviderId } from '@deepseek-ai/dsh-experimental-speech-to-text/types'
+import { launchWebScaffold } from './scaffold.ts'
+
+test('registered local ASR transcribes a real public WAV through the managed Python worker', async () => {
+  const scaffold = await launchWebScaffold({
+    extraOverlayPath: [process.env.DSH_SPEECH_PLUGIN_ROOT! + '/tests/input.overlay.yml'],
+    profile: { packages: [{ dir: process.env.DSH_SPEECH_PLUGIN_ROOT!, enabled: true }], bundles: ['@deepseek-ai/dsh-experimental-voice-input-bundle'] },
+  })
+  try {
+    await scaffold.ctx.settings.update('dsh-speech-service', { models: [{ id: 'real-tiny', name: 'Real tiny', engine: 'faster-whisper',
+      modelPath: process.env.DSH_ASR_MODEL_PATH!, pythonExecutable: process.env.DSH_ASR_PYTHON!, device: 'cpu', computeType: 'int8', languages: ['auto', 'zh', 'en'], enabled: true }] })
+    const speech = scaffold.ctx.speechToText
+    const spec = speech.resolve({ providerId: 'speech-service:real-tiny' as SpeechProviderId,
+      audio: await readFile(process.env.DSH_ASR_AUDIO_PATH!), language: 'zh' })
+    const result = await speech.transcribe(spec, new AbortController().signal)
+    expect(result.text.length).toBeGreaterThan(3)
+    expect(result.audioSeconds).toBeGreaterThan(1)
+    expect(result.inferenceSeconds).toBeGreaterThan(0)
+    console.log(JSON.stringify({ realASR: true, text: result.text, audioSeconds: result.audioSeconds, inferenceSeconds: result.inferenceSeconds }))
+    const controller = new AbortController()
+    const pending = speech.transcribe(spec, controller.signal)
+    const timer = setTimeout(() => controller.abort(new Error('Test cancellation')), 250)
+    try { await expect(pending).rejects.toThrow() }
+    finally { clearTimeout(timer) }
+    await scaffold.ctx.settings.update('dsh-speech-service', { models: [] })
+    expect(speech.listProviders().length).toBe(0)
+  } finally { await scaffold.close() }
+}, 180000)

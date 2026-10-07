@@ -1,2 +1,4 @@
 node_modules/
 .tmp-client/
+__pycache__/
+*.pyc

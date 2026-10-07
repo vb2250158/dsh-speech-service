@@ -2,6 +2,18 @@ import type { ConfigForm } from '@deepseek-ai/dsh-client-ui-settings/client'
 import { SettingsSchema } from '../settings.mjs'
 
 /** Values owned by the enhancement plugin, never by the upstream recognizer. */
+export interface LocalModel {
+  id: string
+  name: string
+  engine: 'funasr' | 'faster-whisper'
+  modelPath: string
+  pythonExecutable: string
+  device: string
+  computeType: string
+  languages: string[]
+  enabled: boolean
+}
+
 export interface Preferences {
   enhancedInput: boolean
   silenceDetection: boolean
@@ -9,6 +21,11 @@ export interface Preferences {
   autoRead: boolean
   silenceThreshold: number
   silenceDurationMs: number
+  models: LocalModel[]
+  workerTimeoutMs: number
+  workerGraceMs: number
+  maxWorkerOutputBytes: number
+  maxConcurrentRecognitions: number
 }
 
 /** Decode the public settings mirror while preserving ConfigForm revision fences. */

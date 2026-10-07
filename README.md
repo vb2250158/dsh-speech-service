@@ -6,7 +6,17 @@
 
 「转写后自动发送」仅在转写成功插入原草稿后提交。录制期间修改草稿造成冲突时，保留转写文字供手动插入；空结果、取消、切换会话和权限失败不会发送。自动朗读只播放启用后的新回复正文，跳过历史、推理、工具调用与中断回复；离开会话、隐藏页面或关闭开关时停止。
 
-识别模型、语言与准备进度仍在官方语音输入设置中。本插件只存储增强偏好。朗读需要启用 dsh-rabiroute-agent，并在 Rabi 配置可用的默认 TTS；通过现有 `/rabiroute/speech` 接口请求音频，不创建新的识别或合成引擎。
+官方模型准备仍在官方语音输入设置中。本插件可另外注册多个本地 ASR 模型，与官方识别器共同出现在本插件设置的「识别服务」列表中。朗读需要启用 dsh-rabiroute-agent，并在 Rabi 配置可用的默认 TTS；通过现有 `/rabiroute/speech` 接口请求音频。
+
+## 自定义 ASR 模型
+
+在插件设置点击「添加 ASR 模型」，填写名称、后端、绝对模型路径、Python 可执行文件、设备和支持的语言，保存后在本插件设置选择。可添加多个模型，编辑、停用或移除单项；不删除模型文件。稳定 id 标识每个配置，名称可以重复，id 不可重复。路径属于运行 DSH 的电脑；换电脑后需调整路径和 Python 环境。
+
+支持 [FunASR](https://github.com/modelscope/FunASR) 的 AutoModel 本地目录（例如匹配该接口的 SenseVoice、Paraformer 检查点），以及 [faster-whisper](https://github.com/SYSTRAN/faster-whisper) 的 CTranslate2 模型目录。普通 Whisper PyTorch 权重不能直接当作 CTranslate2 模型使用。Python 环境需自行安装所选后端及其依赖；插件不安装 Python、不下载模型、不执行模型目录里的自定义 Python 代码。FunASR 配置关闭 remote code，faster-whisper 使用 local_files_only，子进程设置 Hugging Face 离线模式；需要自定义模型代码的检查点不在本版支持范围。
+
+设备默认为 cpu；faster-whisper 精度默认为 int8。语言必须按具体检查点支持范围填写（auto 表示自动识别），不会根据路径猜测。录音开始时通过官方接口固定识别器和语言；更新模型配置会撤销旧识别器并取消在途识别，不回退到其他模型。并发默认 1，繁忙时明确报错。
+
+每次转写启动一个官方 ctx.subprocess 管理的隐藏 Python 子进程，加载模型、识别、退出并释放内存。不是常驻推理服务，大模型每次加载可能较慢。默认识别超时 300000 毫秒，grace 1000 毫秒，结果限额 131072 字节；可在插件配置修改 workerTimeoutMs、workerGraceMs、maxWorkerOutputBytes、maxConcurrentRecognitions。超时、取消和卸载等待受管进程退出后删除临时音频与结果。Home 的 logs/speech-service 保留每次调用的日志和含 PID、父 PID、用途、来源的记录。
 
 ## 逐步退役
 

@@ -8,7 +8,8 @@ if (!source || !process.env.DSH_RABI_PLUGIN_ROOT) throw new Error('Set DSH_SOURC
 const root = fileURLToPath(new URL('../', import.meta.url))
 const temporary = []
 try {
-  for (const name of ['input', 'readback']) {
+  const names = process.env.DSH_ASR_REAL_ONLY ? ['models-real'] : ['input', 'readback']
+  for (const name of names) {
     const path = join(source, 'apps/web/tests/local-speech-service-' + name + '.e2e.ts')
     if (existsSync(path)) throw new Error('Existing browser fixture: ' + path)
     const contents = await readFile(new URL('../tests/' + name + '-browser.fixture.txt', import.meta.url), 'utf8')
