@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Servicio de voz",
+    "description": "Añade detección de silencio, envío automático y lectura de respuestas, con desactivación independiente."
+  }
+}
